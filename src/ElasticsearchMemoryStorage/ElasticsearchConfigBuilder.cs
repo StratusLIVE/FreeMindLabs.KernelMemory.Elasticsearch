@@ -100,6 +100,10 @@ public class ElasticsearchConfigBuilder
     {
         // TODO: improve this at some point
         const string Prefix = "Invalid Elasticsearch configuration: missing ";
+        if (!string.IsNullOrWhiteSpace(this._config.ApiKey))
+        {
+            return this;
+        }
 
         if (string.IsNullOrWhiteSpace(this._config.Endpoint))
         {

@@ -20,7 +20,7 @@ public static partial class ServiceCollectionExtensions
         ArgumentNullException.ThrowIfNull(esConfig, nameof(esConfig));
 
         // The ElasticsearchClient type is thread-safe and can be shared and
-        // reused across multiple threads in consuming applications. 
+        // reused across multiple threads in consuming applications.
         // See https://www.elastic.co/guide/en/elasticsearch/client/net-api/current/recommendations.html
         services.AddSingleton(sp =>
         {
@@ -36,7 +36,7 @@ public static partial class ServiceCollectionExtensions
 
     /// <summary>
     /// Inject Elasticsearch as the default implementation of IMemoryDb
-    /// </summary>
+    /// </summary>Ge
     public static IServiceCollection AddElasticsearchAsVectorDb(this IServiceCollection services,
                Action<ElasticsearchConfigBuilder> configure)
     {

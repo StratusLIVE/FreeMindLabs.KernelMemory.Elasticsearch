@@ -21,19 +21,30 @@ public static class ElasticsearchConfigExtensions
         // TODO: figure out the Dispose issue. It does not feel right.
         // See https://www.elastic.co/guide/en/elasticsearch/client/net-api/current/_options_on_elasticsearchclientsettings.html
 #pragma warning disable CA2000 // Dispose objects before losing scope
-        return new ElasticsearchClientSettings(new Uri(config.Endpoint))
+        var settings = new ElasticsearchClientSettings(new Uri(config.Endpoint))
+            .DisableDirectStreaming(true)
+            .ThrowExceptions(true);
 
-            // TODO: this needs to be more flexible.
-            .Authentication(new BasicAuthentication(config.UserName, config.Password))
-            .DisableDirectStreaming(true)
-            // TODO: Not sure why I need this. Verify configuration maybe?
-            .ServerCertificateValidationCallback((sender, certificate, chain, errors) => true)
-            .CertificateFingerprint(config.CertificateFingerPrint)
-            .ThrowExceptions(true) // Much easier to work with
-#if DEBUG
-            .DisableDirectStreaming(true)
-#endif
-            ;
-#pragma warning restore CA2000 // Dispose objects before losing scope
+        // Prioritize ApiKey if available; otherwise, fall back to BasicAuthentication
+        if (!string.IsNullOrEmpty(config.ApiKey))
+        {
+            settings.Authentication(new ApiKey(config.ApiKey));
+        }
+        else if (!string.IsNullOrEmpty(config.UserName) && !string.IsNullOrEmpty(config.Password))
+        {
+            settings.Authentication(new BasicAuthentication(config.UserName, config.Password));
+        }
+        else
+        {
+            // Handle the scenario where neither ApiKey nor credentials are provided
+            throw new Exception("Either ApiKey or UserName and Password must be provided in the configuration.");
+        }
+
+        // Uncomment the following lines if you determined the certificate validation settings are necessary
+        // after verification
+        // .ServerCertificateValidationCallback((sender, certificate, chain, errors) => true)
+        // .CertificateFingerprint(config.CertificateFingerPrint)
+
+        return settings;
     }
 }
